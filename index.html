@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Anúncios com YouTube Music</title>
+    <style>
+        :root {
+            --primary: #ff0000;
+            --primary-dark: #cc0000;
+            --secondary: #282828;
+            --accent: #ff6b6b;
+            --light: #f5f5f5;
+            --dark: #333333;
+            --gray: #aaaaaa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #121212;
+            color: var(--light);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 25px 0;
+            text-align: center;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 20px rgba(255, 0, 0, 0.3);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff0000, #ff6b6b, #ff0000);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: var(--secondary);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid #444;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card h2 {
+            color: var(--light);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card h2 i {
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--light);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-size: 16px;
+            color: var(--light);
+            transition: border 0.3s, box-shadow 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background: #219653;
+        }
+        
+        .btn-secondary {
+            background: #555;
+        }
+        
+        .btn-secondary:hover {
+            background: #444;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .audio-controls button {
+            padding: 8px 15px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+        
+        th {
+            background-color: #333;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #2a2a2a;
+        }
+        
+        .status-active {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        .status-inactive {
+            color: var(--gray);
+        }
+        
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .actions button {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+        
+        .current-time {
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 20px 0;
+            color: var(--light);
+            font-weight: 600;
+            background: var(--secondary);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .player-container {
+            background: var(--secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .player-info {
+            flex-grow: 1;
+        }
+        
+        .player-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .player-artist {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #444;
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .volume-slider {
+            width: 100px;
+        }
+        
+        .search-results {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background: #1e1e1e;
+        }
+        
+        .search-result {
+            padding: 12px 15px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+        
+        .search-result:hover {
+            background: #2a2a2a;
+        }
+        
+        .search-result img {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+        
+        .search-result-info {
+            flex-grow: 1;
+        }
+        
+        .search-result-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .search-result-artist {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .playing-now {
+            background: linear-gradient(135deg, var(--primary), #e74c3c);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: var(--gray);
+            border-top: 1px solid #444;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .audio-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .player-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .volume-container {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .volume-slider {
+                width: 150px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <i class="fab fa-youtube logo-icon"></i>
+                <h1>Sistema de Anúncios com YouTube Music</h1>
+            </div>
+            <p class="subtitle">Programe anúncios e músicas automaticamente para sua loja</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="current-time" id="current-time">Carregando...</div>
+        
+        <div class="playing-now" id="playing-now">
+            <i class="fas fa-music"></i> Reproduzindo agora: <span id="current-audio"></span>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fas fa-sliders-h"></i> Player do YouTube Music</h2>
+            
+            <div class="form-group">
+                <label for="youtube-search">Buscar no YouTube Music</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="youtube-search" placeholder="Digite o nome da música ou artista">
+                    <button class="btn" id="search-btn"><i class="fas fa-search"></i> Buscar</button>
+                </div>
+            </div>
+            
+            <div class="search-results" id="search-results" style="display: none;">
+                <!-- Resultados da busca aparecerão aqui -->
+            </div>
+            
+            <div class="player-container">
+                <div class="player-info">
+                    <div class="player-title" id="player-title">Nenhuma música selecionada</div>
+                    <div class="player-artist" id="player-artist">Selecione uma música para reproduzir</div>
+                </div>
+                
+                <div class="player-controls">
+                    <button class="btn btn-secondary" id="prev-btn"><i class="fas fa-step-backward"></i></button>
+                    <button class="btn" id="play-btn"><i class="fas fa-play"></i> Reproduzir</button>
+                    <button class="btn" id="pause-btn" style="display: none;"><i class="fas fa-pause"></i> Pausar</button>
+                    <button class="btn btn-secondary" id="next-btn"><i class="fas fa-step-forward"></i></button>
+                    
+                    <div class="progress-container" id="progress-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    
+                    <div class="volume-container">
+                        <i class="fas fa-volume-up"></i>
+                        <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="70">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fas fa-bullhorn"></i> Programar Novo Anúncio</h2>
+            <div class="form-group">
+                <label for="announcement-name">Nome do Anúncio</label>
+                <input type="text" id="announcement-name" placeholder="Ex: Promoção de Verão">
+            </div>
+            
+            <div class="form-group">
+                <label for="announcement-text">Texto do Anúncio (opcional)</label>
+                <textarea id="announcement-text" rows="3" placeholder="Digite o texto do anúncio que será convertido em fala"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="audio-file">Arquivo de Áudio (opcional)</label>
+                <input type="file" id="audio-file" accept="audio/*">
+                <div class="audio-controls">
+                    <button class="btn" id="record-btn"><i class="fas fa-microphone"></i> Gravar Áudio</button>
+                    <button class="btn btn-danger" id="stop-btn" disabled><i class="fas fa-stop"></i> Parar Gravação</button>
+                    <audio id="audio-preview" controls style="display: none;"></audio>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="youtube-playlist">Playlist do YouTube (opcional)</label>
+                <input type="text" id="youtube-playlist" placeholder="ID da playlist do YouTube">
+            </div>
+            
+            <div class="form-group">
+                <label for="schedule-date">Data de Execução</label>
+                <input type="date" id="schedule-date">
+            </div>
+            
+            <div class="form-group">
+                <label for="schedule-time">Horário de Execução</label>
+                <input type="time" id="schedule-time">
+            </div>
+            
+            <div class="form-group">
+                <label for="repeat-option">Repetir</label>
+                <select id="repeat-option">
+                    <option value="once">Apenas uma vez</option>
+                    <option value="daily">Diariamente</option>
+                    <option value="weekly">Semanalmente</option>
+                    <option value="monthly">Mensalmente</option>
+                </select>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-success" id="save-btn"><i class="fas fa-save"></i> Salvar Anúncio</button>
+                <button class="btn btn-secondary" id="clear-btn"><i class="fas fa-broom"></i> Limpar Formulário</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fas fa-list"></i> Anúncios Programados</h2>
+            <table id="announcements-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Data</th>
+                        <th>Hora</th>
+                        <th>Repetição</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="announcements-list">
+                    <!-- Os anúncios serão inseridos aqui via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fas fa-cog"></i> Configurações do Sistema</h2>
+            <div class="form-group">
+                <label for="volume-control">Volume do Sistema</label>
+                <input type="range" id="volume-control" min="0" max="100" value="70">
+                <span id="volume-value">70%</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="silent-hours">Horário Silencioso</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="time" id="silent-start" value="22:00">
+                    <span>até</span>
+                    <input type="time" id="silent-end" value="08:00">
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn" id="save-settings"><i class="fas fa-save"></i> Salvar Configurações</button>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>Sistema de Anúncios Automatizados com YouTube Music &copy; 2023 - Para uso em lojas físicas</p>
+        </div>
+    </footer>
+
+    <script>
+        // Elementos do DOM
+        const currentTimeEl = document.getElementById('current-time');
+        const playingNowEl = document.getElementById('playing-now');
+        const currentAudioEl = document.getElementById('current-audio');
+        const announcementsListEl = document.getElementById('announcements-list');
+        const volumeControlEl = document.getElementById('volume-control');
+        const volumeValueEl = document.getElementById('volume-value');
+        const saveBtn = document.getElementById('save-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const recordBtn = document.getElementById('record-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const audioPreviewEl = document.getElementById('audio-preview');
+        const saveSettingsBtn = document.getElementById('save-settings');
+        const searchBtn = document.getElementById('search-btn');
+        const searchResultsEl = document.getElementById('search-results');
+        const playBtn = document.getElementById('play-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const volumeSlider = document.getElementById('volume-slider');
+        const playerTitle = document.getElementById('player-title');
+        const playerArtist = document.getElementById('player-artist');
+        
+        // Estado do player
+        let isPlaying = false;
+        let currentTrackIndex = 0;
+        let progressInterval;
+        
+        // Playlist de exemplo (em um sistema real, viria da API do YouTube)
+        const playlist = [
+            {
+                id: 1,
+                title: "Música Relaxante",
+                artist: "Artista Exemplo",
+                duration: 180,
+                thumbnail: "https://via.placeholder.com/50"
+            },
+            {
+                id: 2,
+                title: "Hits do Verão",
+                artist: "Vários Artistas",
+                duration: 240,
+                thumbnail: "https://via.placeholder.com/50/FF0000/FFFFFF?text=2"
+            },
+            {
+                id: 3,
+                title: "Música Ambiente",
+                artist: "Artista Ambiente",
+                duration: 200,
+                thumbnail: "https://via.placeholder.com/50/0000FF/FFFFFF?text=3"
+            }
+        ];
+        
+        // Atualizar hora atual
+        function updateCurrentTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit'
+            };
+            currentTimeEl.textContent = now.toLocaleDateString('pt-BR', options);
+        }
+        
+        // Inicializar atualização de hora
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+        
+        // Controle de volume
+        volumeControlEl.addEventListener('input', function() {
+            volumeValueEl.textContent = `${this.value}%`;
+        });
+        
+        // Simulação de gravação de áudio
+        recordBtn.addEventListener('click', function() {
+            recordBtn.disabled = true;
+            stopBtn.disabled = false;
+            alert("Gravação iniciada. Em um sistema real, isso gravaria áudio do microfone.");
+        });
+        
+        stopBtn.addEventListener('click', function() {
+            recordBtn.disabled = false;
+            stopBtn.disabled = true;
+            // Simular um arquivo de áudio gravado
+            audioPreviewEl.style.display = 'block';
+            alert("Gravação parada. Em um sistema real, o áudio estaria disponível para reprodução.");
+        });
+        
+        // Buscar músicas no YouTube (simulação)
+        searchBtn.addEventListener('click', function() {
+            const query = document.getElementById('youtube-search').value;
+            if (!query) {
+                alert("Digite algo para buscar.");
+                return;
+            }
+            
+            // Simular resultados de busca
+            const results = [
+                {
+                    id: 101,
+                    title: `${query} - Versão Oficial`,
+                    artist: "Artista Principal",
+                    duration: "3:45",
+                    thumbnail: "https://via.placeholder.com/50/FF0000/FFFFFF?text=YT"
+                },
+                {
+                    id: 102,
+                    title: `Melhores de ${query}`,
+                    artist: "Vários Artistas",
+                    duration: "2:30",
+                    thumbnail: "https://via.placeholder.com/50/00FF00/FFFFFF?text=YT"
+                },
+                {
+                    id: 103,
+                    title: `${query} (Acústico)`,
+                    artist: "Artista Alternativo",
+                    duration: "4:15",
+                    thumbnail: "https://via.placeholder.com/50/0000FF/FFFFFF?text=YT"
+                }
+            ];
+            
+            displaySearchResults(results);
+        });
+        
+        // Exibir resultados da busca
+        function displaySearchResults(results) {
+            searchResultsEl.innerHTML = '';
+            searchResultsEl.style.display = 'block';
+            
+            results.forEach(result => {
+                const resultElement = document.createElement('div');
+                resultElement.className = 'search-result';
+                resultElement.innerHTML = `
+                    <img src="${result.thumbnail}" alt="${result.title}">
+                    <div class="search-result-info">
+                        <div class="search-result-title">${result.title}</div>
+                        <div class="search-result-artist">${result.artist} • ${result.duration}</div>
+                    </div>
+                    <button class="btn" onclick="addToPlaylist(${result.id})"><i class="fas fa-plus"></i></button>
+                `;
+                
+                resultElement.addEventListener('click', (e) => {
+                    if (!e.target.closest('button')) {
+                        playTrack(result);
+                    }
+                });
+                
+                searchResultsEl.appendChild(resultElement);
+            });
+        }
+        
+        // Adicionar música à playlist
+        window.addToPlaylist = function(id) {
+            alert(`Música ${id} adicionada à playlist. Em um sistema real, isso adicionaria à lista de reprodução.`);
+        };
+        
+        // Reproduzir uma faixa
+        function playTrack(track) {
+            playerTitle.textContent = track.title;
+            playerArtist.textContent = track.artist;
+            playBtn.style.display = 'none';
+            pauseBtn.style.display = 'inline-flex';
+            isPlaying = true;
+            
+            // Simular progresso da música
+            let progress = 0;
+            clearInterval(progressInterval);
+            progressInterval = setInterval(() => {
+                progress += 1;
+                progressBar.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    playNextTrack();
+                }
+            }, track.duration * 10); // Ajustar para a duração real
+            
+            // Mostrar que está tocando
+            currentAudioEl.textContent = `${track.title} - ${track.artist}`;
+            playingNowEl.style.display = 'block';
+        }
+        
+        // Controles do player
+        playBtn.addEventListener('click', function() {
+            if (playlist.length > 0) {
+                playTrack(playlist[currentTrackIndex]);
+            } else {
+                alert("Nenhuma música na playlist. Adicione músicas através da busca.");
+            }
+        });
+        
+        pauseBtn.addEventListener('click', function() {
+            playBtn.style.display = 'inline-flex';
+            pauseBtn.style.display = 'none';
+            isPlaying = false;
+            clearInterval(progressInterval);
+        });
+        
+        prevBtn.addEventListener('click', function() {
+            currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+            if (isPlaying) {
+                playTrack(playlist[currentTrackIndex]);
+            } else {
+                playerTitle.textContent = playlist[currentTrackIndex].title;
+                playerArtist.textContent = playlist[currentTrackIndex].artist;
+            }
+        });
+        
+        nextBtn.addEventListener('click', function() {
+            playNextTrack();
+        });
+        
+        function playNextTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            if (isPlaying) {
+                playTrack(playlist[currentTrackIndex]);
+            } else {
+                playerTitle.textContent = playlist[currentTrackIndex].title;
+                playerArtist.textContent = playlist[currentTrackIndex].artist;
+            }
+        }
+        
+        // Barra de progresso clicável
+        progressContainer.addEventListener('click', function(e) {
+            const clickX = e.offsetX;
+            const width = this.offsetWidth;
+            const percent = (clickX / width) * 100;
+            progressBar.style.width = `${percent}%`;
+        });
+        
+        // Controle de volume do player
+        volumeSlider.addEventListener('input', function() {
+            // Em um sistema real, isso controlaria o volume do player
+            console.log(`Volume ajustado para: ${this.value}%`);
+        });
+        
+        // Salvar anúncio
+        saveBtn.addEventListener('click', function() {
+            const name = document.getElementById('announcement-name').value;
+            const date = document.getElementById('schedule-date').value;
+            const time = document.getElementById('schedule-time').value;
+            const repeat = document.getElementById('repeat-option').value;
+            
+            if (!name || !date || !time) {
+                alert("Por favor, preencha todos os campos obrigatórios.");
+                return;
+            }
+            
+            // Adicionar à lista (em um sistema real, salvaria em um banco de dados)
+            const newAnnouncement = {
+                id: Date.now(),
+                name,
+                date,
+                time,
+                repeat,
+                status: 'active'
+            };
+            
+            addAnnouncementToList(newAnnouncement);
+            clearForm();
+            alert("Anúncio salvo com sucesso!");
+        });
+        
+        // Limpar formulário
+        clearBtn.addEventListener('click', clearForm);
+        
+        function clearForm() {
+            document.getElementById('announcement-name').value = '';
+            document.getElementById('announcement-text').value = '';
+            document.getElementById('schedule-date').value = '';
+            document.getElementById('schedule-time').value = '';
+            document.getElementById('repeat-option').value = 'once';
+            document.getElementById('youtube-playlist').value = '';
+            audioPreviewEl.style.display = 'none';
+            recordBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+        
+        // Adicionar anúncio à lista
+        function addAnnouncementToList(announcement) {
+            const row = document.createElement('tr');
+            
+            // Formatar data para exibição
+            const dateObj = new Date(announcement.date);
+            const formattedDate = dateObj.toLocaleDateString('pt-BR');
+            
+            row.innerHTML = `
+                <td>${announcement.name}</td>
+                <td>${formattedDate}</td>
+                <td>${announcement.time}</td>
+                <td>${getRepeatText(announcement.repeat)}</td>
+                <td class="status-${announcement.status}">${announcement.status === 'active' ? 'Ativo' : 'Inativo'}</td>
+                <td class="actions">
+                    <button class="btn" onclick="playAnnouncement(${announcement.id})"><i class="fas fa-play"></i></button>
+                    <button class="btn btn-secondary" onclick="editAnnouncement(${announcement.id})"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger" onclick="deleteAnnouncement(${announcement.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+            
+            announcementsListEl.appendChild(row);
+        }
+        
+        // Obter texto para opção de repetição
+        function getRepeatText(repeatValue) {
+            switch(repeatValue) {
+                case 'once': return 'Uma vez';
+                case 'daily': return 'Diariamente';
+                case 'weekly': return 'Semanalmente';
+                case 'monthly': return 'Mensalmente';
+                default: return 'Uma vez';
+            }
+        }
+        
+        // Reproduzir anúncio
+        window.playAnnouncement = function(id) {
+            // Em um sistema real, reproduziria o áudio correspondente
+            const announcementName = document.querySelector(`tr[data-id="${id}"] td:first-child`).textContent;
+            currentAudioEl.textContent = announcementName;
+            playingNowEl.style.display = 'block';
+            
+            // Simular reprodução por 5 segundos
+            setTimeout(() => {
+                playingNowEl.style.display = 'none';
+            }, 5000);
+            
+            alert(`Reproduzindo: ${announcementName}`);
+        };
+        
+        // Editar anúncio
+        window.editAnnouncement = function(id) {
+            alert(`Editando anúncio ${id}. Em um sistema real, abriria um formulário de edição.`);
+        };
+        
+        // Excluir anúncio
+        window.deleteAnnouncement = function(id) {
+            if (confirm("Tem certeza que deseja excluir este anúncio?")) {
+                const row = document.querySelector(`tr[data-id="${id}"]`);
+                if (row) {
+                    row.remove();
+                }
+            }
+        };
+        
+        // Salvar configurações
+        saveSettingsBtn.addEventListener('click', function() {
+            const volume = volumeControlEl.value;
+            const silentStart = document.getElementById('silent-start').value;
+            const silentEnd = document.getElementById('silent-end').value;
+            
+            // Em um sistema real, salvaria essas configurações
+            alert(`Configurações salvas:\nVolume: ${volume}%\nHorário silencioso: ${silentStart} - ${silentEnd}`);
+        });
+        
+        // Simulação de anúncios já existentes (para demonstração)
+        const sampleAnnouncements = [
+            {
+                id: 1,
+                name: "Promoção de Inverno",
+                date: "2023-07-15",
+                time: "10:30",
+                repeat: "daily",
+                status: "active"
+            },
+            {
+                id: 2,
+                name: "Liquidação de Verão",
+                date: "2023-08-20",
+                time: "14:00",
+                repeat: "once",
+                status: "active"
+            },
+            {
+                id: 3,
+                name: "Oferta Especial",
+                date: "2023-06-10",
+                time: "16:45",
+                repeat: "weekly",
+                status: "inactive"
+            }
+        ];
+        
+        // Adicionar anúncios de exemplo à lista
+        sampleAnnouncements.forEach(announcement => {
+            addAnnouncementToList(announcement);
+        });
+        
+        // Inicializar player com a primeira música
+        if (playlist.length > 0) {
+            playerTitle.textContent = playlist[0].title;
+            playerArtist.textContent = playlist[0].artist;
+        }
+        
+        // Simulação de verificação de anúncios programados
+        function checkScheduledAnnouncements() {
+            const now = new Date();
+            const currentTime = now.toTimeString().substring(0, 5);
+            const currentDate = now.toISOString().substring(0, 10);
+            
+            // Em um sistema real, verificaria todos os anúncios ativos
+            // e reproduziria aqueles que correspondem à data/hora atual
+        }
+        
+        // Verificar anúncios a cada minuto
+        setInterval(checkScheduledAnnouncements, 60000);
+    </script>
+</body>
+</html>
