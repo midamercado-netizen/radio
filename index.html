@@ -245,6 +245,11 @@
             color: var(--gray);
         }
         
+        .status-closed {
+            color: var(--warning);
+            font-weight: 600;
+        }
+        
         .actions {
             display: flex;
             gap: 8px;
@@ -387,6 +392,17 @@
             100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
         }
         
+        .closed-hours {
+            background: linear-gradient(135deg, var(--warning), #e67e22);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        
         .test-panel {
             background: #1e1e1e;
             border: 1px solid #444;
@@ -410,6 +426,21 @@
         
         .youtube-player.active {
             display: block;
+        }
+        
+        .business-hours {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #1e1e1e;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            border: 1px solid #444;
+        }
+        
+        .business-hours i {
+            color: var(--success);
         }
         
         footer {
@@ -462,12 +493,21 @@
                 <i class="fab fa-youtube logo-icon"></i>
                 <h1>Sistema de Anúncios com YouTube</h1>
             </div>
-            <p class="subtitle">Toque músicas do YouTube e faça anúncios quando quiser</p>
+            <p class="subtitle">Toque músicas do YouTube e anúncios automáticos das 09:00 às 21:00</p>
         </div>
     </header>
     
     <div class="container">
         <div class="current-time" id="current-time">Carregando...</div>
+        
+        <div class="business-hours">
+            <i class="fas fa-clock"></i>
+            <span>Horário Comercial: <strong>09:00 às 21:00</strong> - Anúncios automáticos ativos apenas neste período</span>
+        </div>
+        
+        <div class="closed-hours" id="closed-hours">
+            <i class="fas fa-store-slash"></i> Fora do Horário Comercial - Anúncios automáticos pausados
+        </div>
         
         <div class="playing-now" id="playing-now">
             <i class="fas fa-music"></i> Reproduzindo agora: <span id="current-audio"></span>
@@ -535,15 +575,20 @@
                     <button class="btn" id="close-test-btn"><i class="fas fa-times"></i> Fechar</button>
                 </div>
             </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-success" id="save-announcement-btn"><i class="fas fa-save"></i> Salvar Anúncio</button>
+            </div>
         </div>
         
         <div class="card">
-            <h2><i class="fas fa-list"></i> Anúncios Salvos</h2>
+            <h2><i class="fas fa-list"></i> Anúncios Programados</h2>
             <table id="announcements-table">
                 <thead>
                     <tr>
                         <th>Nome</th>
-                        <th>Texto</th>
+                        <th>Status</th>
+                        <th>Próxima Execução</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -570,7 +615,7 @@
     
     <footer>
         <div class="container">
-            <p>Sistema de Anúncios com YouTube &copy; 2023 - Controle total de áudio</p>
+            <p>Sistema de Anúncios com YouTube &copy; 2023 - Horário comercial: 09:00 às 21:00</p>
         </div>
     </footer>
 
@@ -578,6 +623,7 @@
         // Elementos do DOM
         const currentTimeEl = document.getElementById('current-time');
         const playingNowEl = document.getElementById('playing-now');
+        const closedHoursEl = document.getElementById('closed-hours');
         const currentAudioEl = document.getElementById('current-audio');
         const announcementsListEl = document.getElementById('announcements-list');
         const volumeControlEl = document.getElementById('volume-control');
@@ -586,6 +632,7 @@
         const stopRecordBtn = document.getElementById('stop-record-btn');
         const testAnnouncementBtn = document.getElementById('test-announcement-btn');
         const playAnnouncementBtn = document.getElementById('play-announcement-btn');
+        const saveAnnouncementBtn = document.getElementById('save-announcement-btn');
         const testPanel = document.getElementById('test-panel');
         const testText = document.getElementById('test-text');
         const testPlayBtn = document.getElementById('test-play-btn');
@@ -606,9 +653,13 @@
         // Estado do sistema
         let isPlaying = false;
         let isMuted = false;
+        let isBusinessHours = false;
         let youtubePlayer = null;
+        let announcementInterval = null;
+        const businessStart = "09:00";
+        const businessEnd = "21:00";
         
-        // Atualizar hora atual
+        // Atualizar hora atual e verificar horário comercial
         function updateCurrentTime() {
             const now = new Date();
             const options = { 
@@ -621,6 +672,53 @@
                 second: '2-digit'
             };
             currentTimeEl.textContent = now.toLocaleDateString('pt-BR', options);
+            
+            // Verificar se estamos no horário comercial
+            checkBusinessHours(now);
+        }
+        
+        // Verificar se está no horário comercial
+        function checkBusinessHours(now) {
+            const currentTime = now.toTimeString().substring(0, 5);
+            
+            isBusinessHours = (currentTime >= businessStart && currentTime <= businessEnd);
+            
+            // Atualizar a interface
+            if (isBusinessHours) {
+                closedHoursEl.style.display = 'none';
+                // Iniciar anúncios automáticos se ainda não estiverem rodando
+                if (!announcementInterval) {
+                    startAutomaticAnnouncements();
+                }
+            } else {
+                closedHoursEl.style.display = 'block';
+                // Parar anúncios automáticos
+                if (announcementInterval) {
+                    clearInterval(announcementInterval);
+                    announcementInterval = null;
+                }
+            }
+        }
+        
+        // Iniciar anúncios automáticos
+        function startAutomaticAnnouncements() {
+            // Executar anúncios a cada 15 minutos
+            announcementInterval = setInterval(() => {
+                if (isBusinessHours) {
+                    playRandomAnnouncement();
+                }
+            }, 15 * 60 * 1000); // 15 minutos
+        }
+        
+        // Tocar anúncio aleatório
+        function playRandomAnnouncement() {
+            const announcements = Array.from(document.querySelectorAll('#announcements-list tr'));
+            if (announcements.length > 0) {
+                const randomIndex = Math.floor(Math.random() * announcements.length);
+                const randomAnnouncement = announcements[randomIndex];
+                const announcementId = randomAnnouncement.getAttribute('data-id');
+                playSavedAnnouncement(announcementId);
+            }
         }
         
         // Inicializar atualização de hora
@@ -768,6 +866,33 @@
             }, text.length * 150 + 3000); // Estimativa baseada no tamanho do texto
         });
         
+        // Salvar anúncio
+        saveAnnouncementBtn.addEventListener('click', function() {
+            const name = document.getElementById('announcement-name').value;
+            const text = document.getElementById('announcement-text').value;
+            
+            if (!name) {
+                alert("Digite um nome para o anúncio.");
+                return;
+            }
+            
+            // Adicionar à lista
+            const newAnnouncement = {
+                id: Date.now(),
+                name,
+                text,
+                status: 'active'
+            };
+            
+            addAnnouncementToList(newAnnouncement);
+            
+            // Limpar formulário
+            document.getElementById('announcement-name').value = '';
+            document.getElementById('announcement-text').value = '';
+            
+            alert("Anúncio salvo com sucesso! Será executado automaticamente durante o horário comercial.");
+        });
+        
         // Carregar vídeo do YouTube
         loadVideoBtn.addEventListener('click', function() {
             const url = youtubeUrlEl.value;
@@ -894,35 +1019,30 @@
             }
         });
         
-        // Salvar anúncio
-        function saveAnnouncement() {
-            const name = document.getElementById('announcement-name').value;
-            const text = document.getElementById('announcement-text').value;
-            
-            if (!name) {
-                alert("Digite um nome para o anúncio.");
-                return;
-            }
-            
-            // Adicionar à lista
-            const newAnnouncement = {
-                id: Date.now(),
-                name,
-                text
-            };
-            
-            addAnnouncementToList(newAnnouncement);
-            alert("Anúncio salvo com sucesso!");
-        }
-        
         // Adicionar anúncio à lista
         function addAnnouncementToList(announcement) {
             const row = document.createElement('tr');
             row.setAttribute('data-id', announcement.id);
             
+            // Calcular próxima execução (dentro do horário comercial)
+            const now = new Date();
+            const currentTime = now.toTimeString().substring(0, 5);
+            let nextExecution;
+            
+            if (currentTime < businessStart) {
+                nextExecution = `Hoje às ${businessStart}`;
+            } else if (currentTime > businessEnd) {
+                nextExecution = `Amanhã às ${businessStart}`;
+            } else {
+                // Dentro do horário comercial - próximo em 15 minutos
+                const nextTime = new Date(now.getTime() + 15 * 60 * 1000);
+                nextExecution = `Hoje às ${nextTime.toTimeString().substring(0, 5)}`;
+            }
+            
             row.innerHTML = `
                 <td>${announcement.name}</td>
-                <td>${announcement.text || '-'}</td>
+                <td class="status-active">Ativo</td>
+                <td>${nextExecution}</td>
                 <td class="actions">
                     <button class="btn" onclick="playSavedAnnouncement(${announcement.id})"><i class="fas fa-play"></i></button>
                     <button class="btn btn-warning" onclick="testSavedAnnouncement(${announcement.id})"><i class="fas fa-vial"></i></button>
@@ -937,7 +1057,6 @@
         window.playSavedAnnouncement = function(id) {
             const row = document.querySelector(`tr[data-id="${id}"]`);
             const announcementName = row.querySelector('td:first-child').textContent;
-            const announcementText = row.querySelector('td:nth-child(2)').textContent;
             
             // Pausar música do YouTube se estiver tocando
             if (youtubePlayer && isPlaying) {
@@ -948,11 +1067,10 @@
             }
             
             // Tocar anúncio
-            const textToPlay = announcementText !== '-' ? announcementText : announcementName;
-            speakText(textToPlay);
+            speakText(announcementName);
             
             // Mostrar na interface
-            currentAudioEl.textContent = textToPlay;
+            currentAudioEl.textContent = announcementName;
             playingNowEl.style.display = 'block';
             
             // Esconder após alguns segundos (quando o anúncio terminar)
@@ -966,17 +1084,16 @@
                     pauseBtn.style.display = 'inline-flex';
                     isPlaying = true;
                 }
-            }, textToPlay.length * 150 + 3000); // Estimativa baseada no tamanho do texto
+            }, announcementName.length * 150 + 3000); // Estimativa baseada no tamanho do texto
         };
         
         // Testar anúncio salvo
         window.testSavedAnnouncement = function(id) {
             const row = document.querySelector(`tr[data-id="${id}"]`);
             const announcementName = row.querySelector('td:first-child').textContent;
-            const announcementText = row.querySelector('td:nth-child(2)').textContent;
             
             testPanel.classList.add('active');
-            testText.textContent = announcementText !== '-' ? announcementText : `Teste do anúncio: ${announcementName}`;
+            testText.textContent = `Teste do anúncio: ${announcementName}`;
         };
         
         // Excluir anúncio
@@ -993,7 +1110,7 @@
         document.addEventListener('keydown', function(e) {
             // Ctrl+Enter para salvar anúncio
             if (e.ctrlKey && e.key === 'Enter') {
-                saveAnnouncement();
+                saveAnnouncementBtn.click();
             }
             
             // Espaço para play/pause (apenas se não estiver em um campo de texto)
@@ -1009,39 +1126,25 @@
             }
         });
         
-        // Adicionar botão de salvar anúncio ao formulário
-        const announcementForm = document.querySelector('.card:nth-child(3)');
-        const saveButton = document.createElement('button');
-        saveButton.className = 'btn btn-success';
-        saveButton.innerHTML = '<i class="fas fa-save"></i> Salvar Anúncio';
-        saveButton.addEventListener('click', saveAnnouncement);
-        
-        const buttonGroup = announcementForm.querySelector('.btn-group');
-        if (!buttonGroup) {
-            const newButtonGroup = document.createElement('div');
-            newButtonGroup.className = 'btn-group';
-            newButtonGroup.appendChild(saveButton);
-            announcementForm.querySelector('.audio-controls').after(newButtonGroup);
-        } else {
-            buttonGroup.appendChild(saveButton);
-        }
-        
         // Simulação de anúncios já existentes (para demonstração)
         const sampleAnnouncements = [
             {
                 id: 1,
-                name: "Promoção de Inverno",
-                text: "Atenção, atenção! Promoção especial de inverno, todos os casacos com 30% de desconto!"
+                name: "Promoção de Inverno - Todos os casacos com 30% de desconto!",
+                text: "",
+                status: 'active'
             },
             {
                 id: 2,
-                name: "Liquidação de Verão",
-                text: "Liquidação de verão, camisetas e shorts com preços especiais. Aproveite!"
+                name: "Liquidação de Verão - Camisetas e shorts com preços especiais",
+                text: "",
+                status: 'active'
             },
             {
                 id: 3,
-                name: "Oferta do Dia",
-                text: "Oferta especial do dia, apenas hoje com 50% de desconto em produtos selecionados."
+                name: "Oferta do Dia - Produtos selecionados com 50% de desconto",
+                text: "",
+                status: 'active'
             }
         ];
         
@@ -1049,6 +1152,13 @@
         sampleAnnouncements.forEach(announcement => {
             addAnnouncementToList(announcement);
         });
+        
+        // Iniciar anúncios automáticos se estiver no horário comercial
+        const now = new Date();
+        const currentTime = now.toTimeString().substring(0, 5);
+        if (currentTime >= businessStart && currentTime <= businessEnd) {
+            startAutomaticAnnouncements();
+        }
     </script>
 </body>
 </html>
