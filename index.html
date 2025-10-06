@@ -13,6 +13,8 @@
             --light: #f5f5f5;
             --dark: #333333;
             --gray: #aaaaaa;
+            --success: #27ae60;
+            --warning: #f39c12;
         }
         
         * {
@@ -171,11 +173,19 @@
         }
         
         .btn-success {
-            background: #27ae60;
+            background: var(--success);
         }
         
         .btn-success:hover {
             background: #219653;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+        }
+        
+        .btn-warning:hover {
+            background: #e67e22;
         }
         
         .btn-secondary {
@@ -227,7 +237,7 @@
         }
         
         .status-active {
-            color: #27ae60;
+            color: var(--success);
             font-weight: 600;
         }
         
@@ -377,6 +387,31 @@
             100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
         }
         
+        .test-panel {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .test-panel.active {
+            display: block;
+        }
+        
+        .youtube-player {
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .youtube-player.active {
+            display: block;
+        }
+        
         footer {
             text-align: center;
             margin-top: 40px;
@@ -425,9 +460,9 @@
         <div class="container">
             <div class="logo">
                 <i class="fab fa-youtube logo-icon"></i>
-                <h1>Sistema de Anúncios com YouTube Music</h1>
+                <h1>Sistema de Anúncios com YouTube</h1>
             </div>
-            <p class="subtitle">Programe anúncios e músicas automaticamente para sua loja</p>
+            <p class="subtitle">Toque músicas do YouTube e faça anúncios quando quiser</p>
         </div>
     </header>
     
@@ -439,35 +474,30 @@
         </div>
         
         <div class="card">
-            <h2><i class="fas fa-sliders-h"></i> Player do YouTube Music</h2>
+            <h2><i class="fas fa-sliders-h"></i> Player do YouTube</h2>
             
             <div class="form-group">
-                <label for="youtube-search">Buscar no YouTube Music</label>
+                <label for="youtube-url">URL do YouTube</label>
                 <div style="display: flex; gap: 10px;">
-                    <input type="text" id="youtube-search" placeholder="Digite o nome da música ou artista">
-                    <button class="btn" id="search-btn"><i class="fas fa-search"></i> Buscar</button>
+                    <input type="text" id="youtube-url" placeholder="Cole a URL do vídeo do YouTube aqui">
+                    <button class="btn" id="load-video-btn"><i class="fas fa-play"></i> Carregar Vídeo</button>
                 </div>
             </div>
             
-            <div class="search-results" id="search-results" style="display: none;">
-                <!-- Resultados da busca aparecerão aqui -->
+            <div class="youtube-player" id="youtube-player">
+                <!-- Player do YouTube será inserido aqui -->
             </div>
             
             <div class="player-container">
                 <div class="player-info">
-                    <div class="player-title" id="player-title">Nenhuma música selecionada</div>
-                    <div class="player-artist" id="player-artist">Selecione uma música para reproduzir</div>
+                    <div class="player-title" id="player-title">Nenhum vídeo carregado</div>
+                    <div class="player-artist" id="player-artist">Cole uma URL do YouTube acima</div>
                 </div>
                 
                 <div class="player-controls">
-                    <button class="btn btn-secondary" id="prev-btn"><i class="fas fa-step-backward"></i></button>
                     <button class="btn" id="play-btn"><i class="fas fa-play"></i> Reproduzir</button>
                     <button class="btn" id="pause-btn" style="display: none;"><i class="fas fa-pause"></i> Pausar</button>
-                    <button class="btn btn-secondary" id="next-btn"><i class="fas fa-step-forward"></i></button>
-                    
-                    <div class="progress-container" id="progress-container">
-                        <div class="progress-bar" id="progress-bar"></div>
-                    </div>
+                    <button class="btn btn-secondary" id="stop-btn"><i class="fas fa-stop"></i> Parar</button>
                     
                     <div class="volume-container">
                         <i class="fas fa-volume-up"></i>
@@ -478,68 +508,42 @@
         </div>
         
         <div class="card">
-            <h2><i class="fas fa-bullhorn"></i> Programar Novo Anúncio</h2>
+            <h2><i class="fas fa-bullhorn"></i> Criar Anúncio</h2>
             <div class="form-group">
                 <label for="announcement-name">Nome do Anúncio</label>
                 <input type="text" id="announcement-name" placeholder="Ex: Promoção de Verão">
             </div>
             
             <div class="form-group">
-                <label for="announcement-text">Texto do Anúncio (opcional)</label>
-                <textarea id="announcement-text" rows="3" placeholder="Digite o texto do anúncio que será convertido em fala"></textarea>
+                <label for="announcement-text">Texto do Anúncio</label>
+                <textarea id="announcement-text" rows="3" placeholder="Digite o texto do anúncio"></textarea>
             </div>
             
-            <div class="form-group">
-                <label for="audio-file">Arquivo de Áudio (opcional)</label>
-                <input type="file" id="audio-file" accept="audio/*">
-                <div class="audio-controls">
-                    <button class="btn" id="record-btn"><i class="fas fa-microphone"></i> Gravar Áudio</button>
-                    <button class="btn btn-danger" id="stop-btn" disabled><i class="fas fa-stop"></i> Parar Gravação</button>
-                    <audio id="audio-preview" controls style="display: none;"></audio>
+            <div class="audio-controls">
+                <button class="btn" id="record-btn"><i class="fas fa-microphone"></i> Gravar Áudio</button>
+                <button class="btn btn-danger" id="stop-record-btn" disabled><i class="fas fa-stop"></i> Parar Gravação</button>
+                <button class="btn btn-warning" id="test-announcement-btn"><i class="fas fa-play-circle"></i> Testar Anúncio</button>
+                <button class="btn btn-success" id="play-announcement-btn"><i class="fas fa-bullhorn"></i> Tocar Anúncio Agora</button>
+            </div>
+            
+            <div class="test-panel" id="test-panel">
+                <h3><i class="fas fa-vial"></i> Teste do Anúncio</h3>
+                <p id="test-text">Texto do anúncio aparecerá aqui</p>
+                <div class="btn-group">
+                    <button class="btn btn-success" id="test-play-btn"><i class="fas fa-play"></i> Reproduzir Teste</button>
+                    <button class="btn btn-secondary" id="test-stop-btn"><i class="fas fa-stop"></i> Parar Teste</button>
+                    <button class="btn" id="close-test-btn"><i class="fas fa-times"></i> Fechar</button>
                 </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="youtube-playlist">Playlist do YouTube (opcional)</label>
-                <input type="text" id="youtube-playlist" placeholder="ID da playlist do YouTube">
-            </div>
-            
-            <div class="form-group">
-                <label for="schedule-date">Data de Execução</label>
-                <input type="date" id="schedule-date">
-            </div>
-            
-            <div class="form-group">
-                <label for="schedule-time">Horário de Execução</label>
-                <input type="time" id="schedule-time">
-            </div>
-            
-            <div class="form-group">
-                <label for="repeat-option">Repetir</label>
-                <select id="repeat-option">
-                    <option value="once">Apenas uma vez</option>
-                    <option value="daily">Diariamente</option>
-                    <option value="weekly">Semanalmente</option>
-                    <option value="monthly">Mensalmente</option>
-                </select>
-            </div>
-            
-            <div class="btn-group">
-                <button class="btn btn-success" id="save-btn"><i class="fas fa-save"></i> Salvar Anúncio</button>
-                <button class="btn btn-secondary" id="clear-btn"><i class="fas fa-broom"></i> Limpar Formulário</button>
             </div>
         </div>
         
         <div class="card">
-            <h2><i class="fas fa-list"></i> Anúncios Programados</h2>
+            <h2><i class="fas fa-list"></i> Anúncios Salvos</h2>
             <table id="announcements-table">
                 <thead>
                     <tr>
                         <th>Nome</th>
-                        <th>Data</th>
-                        <th>Hora</th>
-                        <th>Repetição</th>
-                        <th>Status</th>
+                        <th>Texto</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -550,31 +554,23 @@
         </div>
         
         <div class="card">
-            <h2><i class="fas fa-cog"></i> Configurações do Sistema</h2>
+            <h2><i class="fas fa-cog"></i> Configurações Rápidas</h2>
             <div class="form-group">
                 <label for="volume-control">Volume do Sistema</label>
                 <input type="range" id="volume-control" min="0" max="100" value="70">
                 <span id="volume-value">70%</span>
             </div>
             
-            <div class="form-group">
-                <label for="silent-hours">Horário Silencioso</label>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="time" id="silent-start" value="22:00">
-                    <span>até</span>
-                    <input type="time" id="silent-end" value="08:00">
-                </div>
-            </div>
-            
             <div class="btn-group">
-                <button class="btn" id="save-settings"><i class="fas fa-save"></i> Salvar Configurações</button>
+                <button class="btn" id="mute-btn"><i class="fas fa-volume-mute"></i> Silenciar</button>
+                <button class="btn" id="unmute-btn"><i class="fas fa-volume-up"></i> Ativar Som</button>
             </div>
         </div>
     </div>
     
     <footer>
         <div class="container">
-            <p>Sistema de Anúncios Automatizados com YouTube Music &copy; 2023 - Para uso em lojas físicas</p>
+            <p>Sistema de Anúncios com YouTube &copy; 2023 - Controle total de áudio</p>
         </div>
     </footer>
 
@@ -586,53 +582,31 @@
         const announcementsListEl = document.getElementById('announcements-list');
         const volumeControlEl = document.getElementById('volume-control');
         const volumeValueEl = document.getElementById('volume-value');
-        const saveBtn = document.getElementById('save-btn');
-        const clearBtn = document.getElementById('clear-btn');
         const recordBtn = document.getElementById('record-btn');
-        const stopBtn = document.getElementById('stop-btn');
-        const audioPreviewEl = document.getElementById('audio-preview');
-        const saveSettingsBtn = document.getElementById('save-settings');
-        const searchBtn = document.getElementById('search-btn');
-        const searchResultsEl = document.getElementById('search-results');
+        const stopRecordBtn = document.getElementById('stop-record-btn');
+        const testAnnouncementBtn = document.getElementById('test-announcement-btn');
+        const playAnnouncementBtn = document.getElementById('play-announcement-btn');
+        const testPanel = document.getElementById('test-panel');
+        const testText = document.getElementById('test-text');
+        const testPlayBtn = document.getElementById('test-play-btn');
+        const testStopBtn = document.getElementById('test-stop-btn');
+        const closeTestBtn = document.getElementById('close-test-btn');
+        const loadVideoBtn = document.getElementById('load-video-btn');
+        const youtubeUrlEl = document.getElementById('youtube-url');
+        const youtubePlayerEl = document.getElementById('youtube-player');
         const playBtn = document.getElementById('play-btn');
         const pauseBtn = document.getElementById('pause-btn');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('progress-bar');
+        const stopBtn = document.getElementById('stop-btn');
         const volumeSlider = document.getElementById('volume-slider');
         const playerTitle = document.getElementById('player-title');
         const playerArtist = document.getElementById('player-artist');
+        const muteBtn = document.getElementById('mute-btn');
+        const unmuteBtn = document.getElementById('unmute-btn');
         
-        // Estado do player
+        // Estado do sistema
         let isPlaying = false;
-        let currentTrackIndex = 0;
-        let progressInterval;
-        
-        // Playlist de exemplo (em um sistema real, viria da API do YouTube)
-        const playlist = [
-            {
-                id: 1,
-                title: "Música Relaxante",
-                artist: "Artista Exemplo",
-                duration: 180,
-                thumbnail: "https://via.placeholder.com/50"
-            },
-            {
-                id: 2,
-                title: "Hits do Verão",
-                artist: "Vários Artistas",
-                duration: 240,
-                thumbnail: "https://via.placeholder.com/50/FF0000/FFFFFF?text=2"
-            },
-            {
-                id: 3,
-                title: "Música Ambiente",
-                artist: "Artista Ambiente",
-                duration: 200,
-                thumbnail: "https://via.placeholder.com/50/0000FF/FFFFFF?text=3"
-            }
-        ];
+        let isMuted = false;
+        let youtubePlayer = null;
         
         // Atualizar hora atual
         function updateCurrentTime() {
@@ -656,230 +630,302 @@
         // Controle de volume
         volumeControlEl.addEventListener('input', function() {
             volumeValueEl.textContent = `${this.value}%`;
+            if (youtubePlayer) {
+                youtubePlayer.setVolume(this.value);
+            }
+        });
+        
+        // Silenciar/Ativar som
+        muteBtn.addEventListener('click', function() {
+            isMuted = true;
+            if (youtubePlayer) {
+                youtubePlayer.mute();
+            }
+            volumeControlEl.disabled = true;
+            alert("Sistema silenciado");
+        });
+        
+        unmuteBtn.addEventListener('click', function() {
+            isMuted = false;
+            if (youtubePlayer) {
+                youtubePlayer.unMute();
+            }
+            volumeControlEl.disabled = false;
+            alert("Som ativado");
         });
         
         // Simulação de gravação de áudio
         recordBtn.addEventListener('click', function() {
             recordBtn.disabled = true;
-            stopBtn.disabled = false;
+            stopRecordBtn.disabled = false;
             alert("Gravação iniciada. Em um sistema real, isso gravaria áudio do microfone.");
         });
         
-        stopBtn.addEventListener('click', function() {
+        stopRecordBtn.addEventListener('click', function() {
             recordBtn.disabled = false;
-            stopBtn.disabled = true;
-            // Simular um arquivo de áudio gravado
-            audioPreviewEl.style.display = 'block';
-            alert("Gravação parada. Em um sistema real, o áudio estaria disponível para reprodução.");
+            stopRecordBtn.disabled = true;
+            alert("Gravação parada. O áudio está pronto para uso.");
         });
         
-        // Buscar músicas no YouTube (simulação)
-        searchBtn.addEventListener('click', function() {
-            const query = document.getElementById('youtube-search').value;
-            if (!query) {
-                alert("Digite algo para buscar.");
+        // Testar anúncio
+        testAnnouncementBtn.addEventListener('click', function() {
+            const name = document.getElementById('announcement-name').value;
+            const text = document.getElementById('announcement-text').value;
+            
+            if (!name && !text) {
+                alert("Digite pelo menos um nome ou texto para o anúncio.");
                 return;
             }
             
-            // Simular resultados de busca
-            const results = [
-                {
-                    id: 101,
-                    title: `${query} - Versão Oficial`,
-                    artist: "Artista Principal",
-                    duration: "3:45",
-                    thumbnail: "https://via.placeholder.com/50/FF0000/FFFFFF?text=YT"
-                },
-                {
-                    id: 102,
-                    title: `Melhores de ${query}`,
-                    artist: "Vários Artistas",
-                    duration: "2:30",
-                    thumbnail: "https://via.placeholder.com/50/00FF00/FFFFFF?text=YT"
-                },
-                {
-                    id: 103,
-                    title: `${query} (Acústico)`,
-                    artist: "Artista Alternativo",
-                    duration: "4:15",
-                    thumbnail: "https://via.placeholder.com/50/0000FF/FFFFFF?text=YT"
-                }
-            ];
-            
-            displaySearchResults(results);
+            testPanel.classList.add('active');
+            testText.textContent = text || `Teste do anúncio: ${name}`;
         });
         
-        // Exibir resultados da busca
-        function displaySearchResults(results) {
-            searchResultsEl.innerHTML = '';
-            searchResultsEl.style.display = 'block';
+        // Reproduzir teste
+        testPlayBtn.addEventListener('click', function() {
+            const text = document.getElementById('announcement-text').value;
+            const name = document.getElementById('announcement-name').value;
             
-            results.forEach(result => {
-                const resultElement = document.createElement('div');
-                resultElement.className = 'search-result';
-                resultElement.innerHTML = `
-                    <img src="${result.thumbnail}" alt="${result.title}">
-                    <div class="search-result-info">
-                        <div class="search-result-title">${result.title}</div>
-                        <div class="search-result-artist">${result.artist} • ${result.duration}</div>
-                    </div>
-                    <button class="btn" onclick="addToPlaylist(${result.id})"><i class="fas fa-plus"></i></button>
-                `;
+            if (text) {
+                // Em um sistema real, usaria a Web Speech API para sintetizar voz
+                speakText(text);
+                alert(`Reproduzindo teste: "${text}"`);
+            } else if (name) {
+                speakText(`Teste do anúncio: ${name}`);
+                alert(`Reproduzindo teste do anúncio: ${name}`);
+            }
+        });
+        
+        // Função para sintetizar voz (simulação)
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                // Parar qualquer fala anterior
+                window.speechSynthesis.cancel();
                 
-                resultElement.addEventListener('click', (e) => {
-                    if (!e.target.closest('button')) {
-                        playTrack(result);
-                    }
-                });
+                // Criar nova fala
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                utterance.volume = volumeControlEl.value / 100;
                 
-                searchResultsEl.appendChild(resultElement);
-            });
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Seu navegador não suporta síntese de voz. O texto seria: " + text);
+            }
         }
         
-        // Adicionar música à playlist
-        window.addToPlaylist = function(id) {
-            alert(`Música ${id} adicionada à playlist. Em um sistema real, isso adicionaria à lista de reprodução.`);
-        };
+        // Parar teste
+        testStopBtn.addEventListener('click', function() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            alert("Teste interrompido");
+        });
         
-        // Reproduzir uma faixa
-        function playTrack(track) {
-            playerTitle.textContent = track.title;
-            playerArtist.textContent = track.artist;
-            playBtn.style.display = 'none';
-            pauseBtn.style.display = 'inline-flex';
-            isPlaying = true;
+        // Fechar painel de teste
+        closeTestBtn.addEventListener('click', function() {
+            testPanel.classList.remove('active');
+        });
+        
+        // Tocar anúncio agora
+        playAnnouncementBtn.addEventListener('click', function() {
+            const name = document.getElementById('announcement-name').value;
+            const text = document.getElementById('announcement-text').value;
             
-            // Simular progresso da música
-            let progress = 0;
-            clearInterval(progressInterval);
-            progressInterval = setInterval(() => {
-                progress += 1;
-                progressBar.style.width = `${progress}%`;
-                
-                if (progress >= 100) {
-                    clearInterval(progressInterval);
-                    playNextTrack();
-                }
-            }, track.duration * 10); // Ajustar para a duração real
+            if (!name && !text) {
+                alert("Crie um anúncio primeiro.");
+                return;
+            }
             
-            // Mostrar que está tocando
-            currentAudioEl.textContent = `${track.title} - ${track.artist}`;
+            // Pausar música do YouTube se estiver tocando
+            if (youtubePlayer && isPlaying) {
+                youtubePlayer.pauseVideo();
+                playBtn.style.display = 'inline-flex';
+                pauseBtn.style.display = 'none';
+                isPlaying = false;
+            }
+            
+            // Tocar anúncio
+            const announcementText = text || `Anúncio: ${name}`;
+            speakText(announcementText);
+            
+            // Mostrar na interface
+            currentAudioEl.textContent = announcementText;
             playingNowEl.style.display = 'block';
+            
+            // Esconder após alguns segundos (quando o anúncio terminar)
+            setTimeout(() => {
+                playingNowEl.style.display = 'none';
+                
+                // Retomar música se estava tocando antes
+                if (youtubePlayer) {
+                    youtubePlayer.playVideo();
+                    playBtn.style.display = 'none';
+                    pauseBtn.style.display = 'inline-flex';
+                    isPlaying = true;
+                }
+            }, text.length * 150 + 3000); // Estimativa baseada no tamanho do texto
+        });
+        
+        // Carregar vídeo do YouTube
+        loadVideoBtn.addEventListener('click', function() {
+            const url = youtubeUrlEl.value;
+            if (!url) {
+                alert("Cole uma URL do YouTube.");
+                return;
+            }
+            
+            // Extrair ID do vídeo da URL
+            const videoId = extractYouTubeId(url);
+            if (!videoId) {
+                alert("URL do YouTube inválida.");
+                return;
+            }
+            
+            // Carregar player do YouTube
+            loadYouTubePlayer(videoId);
+        });
+        
+        // Extrair ID do vídeo do YouTube
+        function extractYouTubeId(url) {
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[7].length === 11) ? match[7] : false;
+        }
+        
+        // Carregar player do YouTube
+        function loadYouTubePlayer(videoId) {
+            // Limpar player anterior
+            youtubePlayerEl.innerHTML = '';
+            
+            // Criar iframe do YouTube
+            const iframe = document.createElement('iframe');
+            iframe.width = "100%";
+            iframe.height = "300";
+            iframe.src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1`;
+            iframe.frameBorder = "0";
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            iframe.allowFullscreen = true;
+            
+            youtubePlayerEl.appendChild(iframe);
+            youtubePlayerEl.classList.add('active');
+            
+            // Inicializar API do YouTube
+            window.onYouTubeIframeAPIReady = function() {
+                youtubePlayer = new YT.Player(iframe, {
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            };
+            
+            // Carregar API do YouTube se não estiver carregada
+            if (!window.YT) {
+                const tag = document.createElement('script');
+                tag.src = "https://www.youtube.com/iframe_api";
+                const firstScriptTag = document.getElementsByTagName('script')[0];
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            } else {
+                window.onYouTubeIframeAPIReady();
+            }
+            
+            // Atualizar informações do player
+            playerTitle.textContent = "Vídeo do YouTube Carregado";
+            playerArtist.textContent = "Controles habilitados";
+        }
+        
+        // Quando o player estiver pronto
+        function onPlayerReady(event) {
+            // Definir volume inicial
+            event.target.setVolume(volumeControlEl.value);
+            console.log("Player do YouTube pronto");
+        }
+        
+        // Quando o estado do player mudar
+        function onPlayerStateChange(event) {
+            // -1 (não iniciado), 0 (terminado), 1 (reproduzindo), 2 (pausado), 3 (buffering), 5 (enfileirado)
+            if (event.data === YT.PlayerState.PLAYING) {
+                isPlaying = true;
+                playBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-flex';
+                
+                // Mostrar que está tocando
+                currentAudioEl.textContent = "Vídeo do YouTube";
+                playingNowEl.style.display = 'block';
+            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+                isPlaying = false;
+                playBtn.style.display = 'inline-flex';
+                pauseBtn.style.display = 'none';
+                
+                if (event.data === YT.PlayerState.ENDED) {
+                    playingNowEl.style.display = 'none';
+                }
+            }
         }
         
         // Controles do player
         playBtn.addEventListener('click', function() {
-            if (playlist.length > 0) {
-                playTrack(playlist[currentTrackIndex]);
+            if (youtubePlayer) {
+                youtubePlayer.playVideo();
             } else {
-                alert("Nenhuma música na playlist. Adicione músicas através da busca.");
+                alert("Carregue um vídeo do YouTube primeiro.");
             }
         });
         
         pauseBtn.addEventListener('click', function() {
-            playBtn.style.display = 'inline-flex';
-            pauseBtn.style.display = 'none';
-            isPlaying = false;
-            clearInterval(progressInterval);
-        });
-        
-        prevBtn.addEventListener('click', function() {
-            currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
-            if (isPlaying) {
-                playTrack(playlist[currentTrackIndex]);
-            } else {
-                playerTitle.textContent = playlist[currentTrackIndex].title;
-                playerArtist.textContent = playlist[currentTrackIndex].artist;
+            if (youtubePlayer) {
+                youtubePlayer.pauseVideo();
             }
         });
         
-        nextBtn.addEventListener('click', function() {
-            playNextTrack();
-        });
-        
-        function playNextTrack() {
-            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-            if (isPlaying) {
-                playTrack(playlist[currentTrackIndex]);
-            } else {
-                playerTitle.textContent = playlist[currentTrackIndex].title;
-                playerArtist.textContent = playlist[currentTrackIndex].artist;
+        stopBtn.addEventListener('click', function() {
+            if (youtubePlayer) {
+                youtubePlayer.stopVideo();
+                playingNowEl.style.display = 'none';
             }
-        }
-        
-        // Barra de progresso clicável
-        progressContainer.addEventListener('click', function(e) {
-            const clickX = e.offsetX;
-            const width = this.offsetWidth;
-            const percent = (clickX / width) * 100;
-            progressBar.style.width = `${percent}%`;
         });
         
         // Controle de volume do player
         volumeSlider.addEventListener('input', function() {
-            // Em um sistema real, isso controlaria o volume do player
-            console.log(`Volume ajustado para: ${this.value}%`);
+            if (youtubePlayer) {
+                youtubePlayer.setVolume(this.value);
+            }
         });
         
         // Salvar anúncio
-        saveBtn.addEventListener('click', function() {
+        function saveAnnouncement() {
             const name = document.getElementById('announcement-name').value;
-            const date = document.getElementById('schedule-date').value;
-            const time = document.getElementById('schedule-time').value;
-            const repeat = document.getElementById('repeat-option').value;
+            const text = document.getElementById('announcement-text').value;
             
-            if (!name || !date || !time) {
-                alert("Por favor, preencha todos os campos obrigatórios.");
+            if (!name) {
+                alert("Digite um nome para o anúncio.");
                 return;
             }
             
-            // Adicionar à lista (em um sistema real, salvaria em um banco de dados)
+            // Adicionar à lista
             const newAnnouncement = {
                 id: Date.now(),
                 name,
-                date,
-                time,
-                repeat,
-                status: 'active'
+                text
             };
             
             addAnnouncementToList(newAnnouncement);
-            clearForm();
             alert("Anúncio salvo com sucesso!");
-        });
-        
-        // Limpar formulário
-        clearBtn.addEventListener('click', clearForm);
-        
-        function clearForm() {
-            document.getElementById('announcement-name').value = '';
-            document.getElementById('announcement-text').value = '';
-            document.getElementById('schedule-date').value = '';
-            document.getElementById('schedule-time').value = '';
-            document.getElementById('repeat-option').value = 'once';
-            document.getElementById('youtube-playlist').value = '';
-            audioPreviewEl.style.display = 'none';
-            recordBtn.disabled = false;
-            stopBtn.disabled = true;
         }
         
         // Adicionar anúncio à lista
         function addAnnouncementToList(announcement) {
             const row = document.createElement('tr');
-            
-            // Formatar data para exibição
-            const dateObj = new Date(announcement.date);
-            const formattedDate = dateObj.toLocaleDateString('pt-BR');
+            row.setAttribute('data-id', announcement.id);
             
             row.innerHTML = `
                 <td>${announcement.name}</td>
-                <td>${formattedDate}</td>
-                <td>${announcement.time}</td>
-                <td>${getRepeatText(announcement.repeat)}</td>
-                <td class="status-${announcement.status}">${announcement.status === 'active' ? 'Ativo' : 'Inativo'}</td>
+                <td>${announcement.text || '-'}</td>
                 <td class="actions">
-                    <button class="btn" onclick="playAnnouncement(${announcement.id})"><i class="fas fa-play"></i></button>
-                    <button class="btn btn-secondary" onclick="editAnnouncement(${announcement.id})"><i class="fas fa-edit"></i></button>
+                    <button class="btn" onclick="playSavedAnnouncement(${announcement.id})"><i class="fas fa-play"></i></button>
+                    <button class="btn btn-warning" onclick="testSavedAnnouncement(${announcement.id})"><i class="fas fa-vial"></i></button>
                     <button class="btn btn-danger" onclick="deleteAnnouncement(${announcement.id})"><i class="fas fa-trash"></i></button>
                 </td>
             `;
@@ -887,35 +933,50 @@
             announcementsListEl.appendChild(row);
         }
         
-        // Obter texto para opção de repetição
-        function getRepeatText(repeatValue) {
-            switch(repeatValue) {
-                case 'once': return 'Uma vez';
-                case 'daily': return 'Diariamente';
-                case 'weekly': return 'Semanalmente';
-                case 'monthly': return 'Mensalmente';
-                default: return 'Uma vez';
+        // Reproduzir anúncio salvo
+        window.playSavedAnnouncement = function(id) {
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            const announcementName = row.querySelector('td:first-child').textContent;
+            const announcementText = row.querySelector('td:nth-child(2)').textContent;
+            
+            // Pausar música do YouTube se estiver tocando
+            if (youtubePlayer && isPlaying) {
+                youtubePlayer.pauseVideo();
+                playBtn.style.display = 'inline-flex';
+                pauseBtn.style.display = 'none';
+                isPlaying = false;
             }
-        }
-        
-        // Reproduzir anúncio
-        window.playAnnouncement = function(id) {
-            // Em um sistema real, reproduziria o áudio correspondente
-            const announcementName = document.querySelector(`tr[data-id="${id}"] td:first-child`).textContent;
-            currentAudioEl.textContent = announcementName;
+            
+            // Tocar anúncio
+            const textToPlay = announcementText !== '-' ? announcementText : announcementName;
+            speakText(textToPlay);
+            
+            // Mostrar na interface
+            currentAudioEl.textContent = textToPlay;
             playingNowEl.style.display = 'block';
             
-            // Simular reprodução por 5 segundos
+            // Esconder após alguns segundos (quando o anúncio terminar)
             setTimeout(() => {
                 playingNowEl.style.display = 'none';
-            }, 5000);
-            
-            alert(`Reproduzindo: ${announcementName}`);
+                
+                // Retomar música se estava tocando antes
+                if (youtubePlayer) {
+                    youtubePlayer.playVideo();
+                    playBtn.style.display = 'none';
+                    pauseBtn.style.display = 'inline-flex';
+                    isPlaying = true;
+                }
+            }, textToPlay.length * 150 + 3000); // Estimativa baseada no tamanho do texto
         };
         
-        // Editar anúncio
-        window.editAnnouncement = function(id) {
-            alert(`Editando anúncio ${id}. Em um sistema real, abriria um formulário de edição.`);
+        // Testar anúncio salvo
+        window.testSavedAnnouncement = function(id) {
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            const announcementName = row.querySelector('td:first-child').textContent;
+            const announcementText = row.querySelector('td:nth-child(2)').textContent;
+            
+            testPanel.classList.add('active');
+            testText.textContent = announcementText !== '-' ? announcementText : `Teste do anúncio: ${announcementName}`;
         };
         
         // Excluir anúncio
@@ -928,41 +989,59 @@
             }
         };
         
-        // Salvar configurações
-        saveSettingsBtn.addEventListener('click', function() {
-            const volume = volumeControlEl.value;
-            const silentStart = document.getElementById('silent-start').value;
-            const silentEnd = document.getElementById('silent-end').value;
+        // Adicionar evento de tecla Enter para salvar anúncio
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+Enter para salvar anúncio
+            if (e.ctrlKey && e.key === 'Enter') {
+                saveAnnouncement();
+            }
             
-            // Em um sistema real, salvaria essas configurações
-            alert(`Configurações salvas:\nVolume: ${volume}%\nHorário silencioso: ${silentStart} - ${silentEnd}`);
+            // Espaço para play/pause (apenas se não estiver em um campo de texto)
+            if (e.key === ' ' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                if (youtubePlayer) {
+                    if (isPlaying) {
+                        youtubePlayer.pauseVideo();
+                    } else {
+                        youtubePlayer.playVideo();
+                    }
+                }
+            }
         });
+        
+        // Adicionar botão de salvar anúncio ao formulário
+        const announcementForm = document.querySelector('.card:nth-child(3)');
+        const saveButton = document.createElement('button');
+        saveButton.className = 'btn btn-success';
+        saveButton.innerHTML = '<i class="fas fa-save"></i> Salvar Anúncio';
+        saveButton.addEventListener('click', saveAnnouncement);
+        
+        const buttonGroup = announcementForm.querySelector('.btn-group');
+        if (!buttonGroup) {
+            const newButtonGroup = document.createElement('div');
+            newButtonGroup.className = 'btn-group';
+            newButtonGroup.appendChild(saveButton);
+            announcementForm.querySelector('.audio-controls').after(newButtonGroup);
+        } else {
+            buttonGroup.appendChild(saveButton);
+        }
         
         // Simulação de anúncios já existentes (para demonstração)
         const sampleAnnouncements = [
             {
                 id: 1,
                 name: "Promoção de Inverno",
-                date: "2023-07-15",
-                time: "10:30",
-                repeat: "daily",
-                status: "active"
+                text: "Atenção, atenção! Promoção especial de inverno, todos os casacos com 30% de desconto!"
             },
             {
                 id: 2,
                 name: "Liquidação de Verão",
-                date: "2023-08-20",
-                time: "14:00",
-                repeat: "once",
-                status: "active"
+                text: "Liquidação de verão, camisetas e shorts com preços especiais. Aproveite!"
             },
             {
                 id: 3,
-                name: "Oferta Especial",
-                date: "2023-06-10",
-                time: "16:45",
-                repeat: "weekly",
-                status: "inactive"
+                name: "Oferta do Dia",
+                text: "Oferta especial do dia, apenas hoje com 50% de desconto em produtos selecionados."
             }
         ];
         
@@ -970,25 +1049,6 @@
         sampleAnnouncements.forEach(announcement => {
             addAnnouncementToList(announcement);
         });
-        
-        // Inicializar player com a primeira música
-        if (playlist.length > 0) {
-            playerTitle.textContent = playlist[0].title;
-            playerArtist.textContent = playlist[0].artist;
-        }
-        
-        // Simulação de verificação de anúncios programados
-        function checkScheduledAnnouncements() {
-            const now = new Date();
-            const currentTime = now.toTimeString().substring(0, 5);
-            const currentDate = now.toISOString().substring(0, 10);
-            
-            // Em um sistema real, verificaria todos os anúncios ativos
-            // e reproduziria aqueles que correspondem à data/hora atual
-        }
-        
-        // Verificar anúncios a cada minuto
-        setInterval(checkScheduledAnnouncements, 60000);
     </script>
 </body>
 </html>
